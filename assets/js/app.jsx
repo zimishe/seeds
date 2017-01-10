@@ -28,6 +28,14 @@ var CARDS = [
         priceNew: 60
     },
     {
+        id: 3,
+        image: 'assets/img/card1.jpg',
+        discount: '',
+        special: '',
+        name: 'Мега пачка',
+        priceOld: 666,
+        priceNew: 500
+    }, {
         id: 4,
         image: 'assets/img/card2.jpg',
         discount: 11,
@@ -103,7 +111,8 @@ var CARDS = [
     }
 ];
 
-var currentCounted = 0;
+var currentCounted = 0,
+    currentAddedToCart = [];
 
 var SearchForm = React.createClass({
     render: function() {
@@ -188,11 +197,39 @@ var CardItem = React.createClass({
     }
 });
 
+var AddedItem = React.createClass({
+
+    render: function() {
+
+        return (
+            <div className="cards__item">
+                <div className="cards__item__info">
+                    <div className="cards__item__name">
+                        <a>{this.props.name}</a>
+                    </div>
+                    <div className="cards__item__bottom">
+                        <div className="cards__item__price">
+                            <div className="cards__item__price--new">
+                                <p><strong>{this.props.priceNew}</strong> грн</p>
+                            </div>
+                        </div>
+                        <button className="remove-from-cart" onClick={this.props.handleClick}>
+                            Удалить
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+});
+
+
 var SeedShop = React.createClass({
     getInitialState: function() {
         return {
             cardInfo: CARDS,
-            totalCounted: currentCounted
+            totalCounted: currentCounted,
+            addedTotal: CARDS
         };
     },
 
@@ -211,23 +248,47 @@ var SeedShop = React.createClass({
 
     addToCart: function(e) {
         var target = e.target;
-        
-        if (!target.classList.contains('disabled')) {
-            target.classList.add('disabled');
-            target.setAttribute('disabled', 'disabled');
 
-            currentCounted += 1;
+        // console.log('e', e);
 
-            this.setState({
-                totalCounted: currentCounted
-            });
+        function setCounter() {
+
+            if (!target.classList.contains('disabled')) {
+                target.classList.add('disabled');
+                target.setAttribute('disabled', 'disabled');
+
+                currentCounted += 1;
+            }
         }
-        
+
+        setCounter();
+
+        // currentAddedToCart.push(
+        //     {
+        //         id: 1,
+        //         key: 1,
+        //         name: 'zalupa'
+        //     }
+        // );
+
+        this.setState({
+            totalCounted: currentCounted,
+            // addedTotal: currentAddedToCart
+        });
+
+
+        function cartTop(key) {
+            console.log('k', key);
+        }
+
+        // cartTop(key);
+
+        // addedTotal: currentAddedToCart
     },
     
     render: function() {
         var addFunc = this.addToCart;
-        
+
         return (
             <div className="shop">
                 <div className="header">
@@ -261,6 +322,7 @@ var SeedShop = React.createClass({
                                     />;
                                 })
                             }
+
                         </div>
                     </div>
                 </div>
@@ -315,7 +377,6 @@ var Switcher = React.createClass({
            list = document.querySelector('.switcher__list');
            
            container.classList.add('list');
-           container.classList.remove('grid');
        }
     },
     
@@ -326,11 +387,10 @@ var Switcher = React.createClass({
        
        if ((typeof switcher != 'undefined') && (typeof switcher != 'undefined')) {
            grid = document.querySelector('.switcher__grid');
-           
-           container.classList.add('grid');
+
            container.classList.remove('list');
        }
-   }, 
+   },
     
    render: function() {
        return (

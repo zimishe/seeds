@@ -84,6 +84,7 @@ body {
 
 .cart {
     padding-right: 15px;
+    position: relative;
     
     a {
         display: block;
@@ -109,6 +110,19 @@ body {
     
     img {
         width: 30px;
+    }
+
+    &__added {
+        position: absolute;
+        right: 0;
+        top: 40px;
+        z-index: 1;
+
+        .cards {
+            &__item {
+                background: #fff;
+            }
+        }
     }
 }
 
@@ -173,63 +187,56 @@ body {
     &__controls {
         padding: 10px 0;
     }
-    
-    &__items__list {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: flex-start;
-        justify-content: space-between;
-    }
-    
+
     &__item {
         border: 1px solid #ccc;
         display: flex;
         flex-wrap: wrap;
         margin: 5px 0;
         flex-basis: calc(33.333% - 10px);
-        
+
         &__photo {
             width: 100%;
             position: relative;
             height: 130px;
             @include cover();
-            
+
             &:before {
                 content: '';
                 @include absolute();
                 background: rgba(0, 0, 0, .3);
             }
         }
-        
+
         &__discount,
         &__mark {
             position: absolute;
             padding: 3px 10px;
         }
-        
+
         &__discount {
             right: 0;
             top: 0;
             background: #f5910b;
         }
-        
+
         &__mark {
             left: 0;
             bottom: 0;
             background: #107d4d;
         }
-        
+
         &__info {
             padding: 5px 10px;
             width: 100%;
-            
+
             label {
                 display: flex;
                 align-items: center;
                 font: rem(14px, 18px) $light;
                 color: #000;
                 cursor: pointer;
-                
+
                 .checkbox {
                     display: block;
                     width: 16px;
@@ -237,7 +244,7 @@ body {
                     border-radius: 3px;
                     border: 2px solid #000;
                     margin-right: 10px;
-                    
+
                     &:before {
                         content: '';
                         display: block;
@@ -250,73 +257,117 @@ body {
                         transition: opacity .2s ease;
                     }
                 }
-                
+
                 input {
                     display: none;
-                    
+
                     &:checked {
                         & + .checkbox {
                             &:before {
-                                opacity: 1;    
+                                opacity: 1;
                             }
                         }
                     }
                 }
             }
         }
-        
+
         &__name {
             text-align: left;
             margin-bottom: 10px;
             width: 100%;
-            
+
             a {
                 font: rem(16px, 16px) $light;
                 color: #0e5ea7;
                 text-align: left;
                 text-decoration: none;
                 transition: all .2s ease;
-                
+
                 &:hover {
                     text-decoration: underline;
                 }
             }
         }
-        
+
         &__bottom {
             width: 100%;
             display: flex;
             justify-content: space-between;
             padding: 15px 0 10px;
         }
-        
+
         &__price {
             display: flex;
             align-items: center;
-            
+
             &--old,
             &--new {
-                
+
                 p {
                     font: rem(12px, 12px) $light;
-                    
+
                     strong {
                         font: rem(16px, 16px) $bold;
                     }
                 }
             }
-            
+
             &--old {
                 color: #ff6767;
-                
+
                 p {
-                    text-decoration: line-through;   
+                    text-decoration: line-through;
                 }
             }
-            
+
             &--new {
                 color: #128c6c;
                 margin-left: 5px;
+            }
+        }
+    }
+
+    &__items__list {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+
+        &.list {
+            .cards {
+                &__item {
+                    flex-basis: 100%;
+
+                    &__name {
+                        margin-bottom: 5px;
+                    }
+
+                    &__bottom {
+                        justify-content: flex-start;
+                        margin-top: 5px;
+                    }
+
+                    &__price {
+                        margin-right: 10px;
+                    }
+
+                    &__mark {
+                        left: auto;
+                        bottom: auto;
+                        top: 0;
+                        right: 60px;
+                    }
+
+                    &__photo {
+                        background-image: none !important;
+                        height: auto;
+                    }
+
+                    &__bottom {
+                        padding: 0;
+                    }
+                }
             }
         }
     }
