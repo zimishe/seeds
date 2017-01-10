@@ -28,14 +28,6 @@ var CARDS = [
         priceNew: 60
     },
     {
-        id: 3,
-        image: 'assets/img/card1.jpg',
-        discount: '',
-        special: '',
-        name: 'Мега пачка',
-        priceOld: 666,
-        priceNew: 500
-    }, {
         id: 4,
         image: 'assets/img/card2.jpg',
         discount: 11,
