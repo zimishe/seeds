@@ -1,7 +1,9 @@
-var React = require('react'),
-    ReactDOM = require('react-dom');
+const React = require('react'),
+      ReactDOM = require('react-dom');
 
-var CARDS = [
+import { createStore } from 'redux';
+
+const CARDS = [
     {
         id: 1,
         image: 'assets/img/card1.jpg',
@@ -103,10 +105,133 @@ var CARDS = [
     }
 ];
 
-var currentCounted = 0;
+const initialState = {
+    count: 0,
+    addedOnTop: [],
+    cardInfo: CARDS
+};
 
-var SearchForm = React.createClass({
-    render: function() {
+function reducer(state = { count: 0, addedOnTop: []}, action) {
+    switch (action.type) {
+        case 'ADD' : return { count: state.count + action.amount, addedOnTop: action.addedItem};
+
+        default : return state;
+    }
+}
+
+function incrementAction(storeState, curAddedItem) {
+    storeState.push(curAddedItem);
+    
+    return {
+        type: 'ADD', amount: 1, addedItem : storeState
+    }
+}
+
+function searchAction(updatedState) {
+
+}
+
+const store = createStore(reducer, initialState);
+
+class SeedShop extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            cardInfo: CARDS
+        };
+        
+        this.handleSearch = this.handleSearch.bind(this);
+        this.showAdded = this.showAdded.bind(this);
+    }
+
+    componentDidMount() {
+        store.subscribe(() => this.forceUpdate());
+    }
+
+    handleSearch(event) {
+        // console.log('cards', store)
+
+        let searchQuery = event.target.value.toLowerCase();
+
+        let cardInfo = CARDS.filter(function(el) {
+            let searchValue = el.name.toLowerCase();
+            return searchValue.indexOf(searchQuery) !== -1;  // return element if function returns true
+        });
+
+        this.setState({
+            cardInfo: cardInfo
+        });
+    }
+
+    showAdded() {
+        let cart = document.querySelector('.cart__added');
+
+        cart.classList.toggle('active');
+    }
+
+    render() {
+        let addedItemsCounter = store.getState().count;
+
+        return (
+            <div className="shop">
+                <div className="header">
+                    <HeaderLogo/>
+                    <div className="cart">
+                        <a className="cart--toggle" data-counter={addedItemsCounter} onClick={this.showAdded}>
+                            <img src="assets/img/cart.png" alt="Cart"/>
+                        </a>
+                        <div className="cart__added">
+                            {/*{console.log('sss', store.getState().addedOnTop)}*/}
+
+                            {
+                                store.getState().addedOnTop.map(function(el, i) {
+                                    return <AddedItem
+                                        key={el.key}
+                                        id={el.key}
+                                        name={el.name}
+                                        priceNew={el.price}
+                                    />;
+                                })
+                            }
+                            <div className="cart__added__checkout">
+                                <button className="cart-checkout">Оформити замовлення</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="content">
+                    <SideMenu />
+                    <div className="cards">
+                        <div className="cards__controls">
+                            <SearchForm handleSearch={this.handleSearch} />
+                            <Switcher />
+                        </div>
+
+                        <div className="cards__items__list">
+                            {
+                                this.state.cardInfo.map(function(el) {
+                                    return <CardItem
+                                        key={el.id}
+                                        id={el.id}
+                                        name={el.name}
+                                        discount={el.discount}
+                                        special={el.special}
+                                        priceOld={el.priceOld}
+                                        priceNew={el.priceNew}
+                                    />;
+                                })
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+}
+
+class SearchForm extends React.Component {
+    render() {
         return (
             <form className="search">
                 <input type="search" placeholder="Search.." className="search__field" onChange={this.props.handleSearch} />
@@ -116,38 +241,100 @@ var SearchForm = React.createClass({
             </form>
         )
     }
-});
+}
 
-var CardItem = React.createClass({
+class AddedItem extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.removeItem = this.removeItem.bind(this);
+    }
+
+    removeItem(idToRemove) {
+        console.log('got', idToRemove);
+    }
+
+    render() {
+        const id = this.props.id;
+        // console.log('id', id);
+
+        return (
+            <div className="cards__item">
+                <div className="cards__item__info">
+                    <div className="cards__item__name">
+                        <a>{this.props.name}</a>
+                    </div>
+                    <div className="cards__item__bottom">
+                        <div className="cards__item__price">
+                            <div className="cards__item__price--new">
+                                <p><strong>{this.props.priceNew}</strong> грн</p>
+                            </div>
+                        </div>
+                        <button className="remove-from-cart" onClick={this.removeItem.bind(this, id)}>
+                            Видалити
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+}
+
+class CardItem extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.addToCart = this.addToCart.bind(this);
+    }
+
+    addToCart(key, name, price, event) {
+        let target = event.target;
+        
+        function setCounter() {
+            if (!target.classList.contains('disabled')) {
+                target.classList.add('disabled');
+                target.setAttribute('disabled', 'disabled');
+                
+                store.dispatch(incrementAction(store.getState().addedOnTop, {key: key, name: name, price: price}));
+                // console.log('store upd', store.getState().addedOnTop);
+            }
+        }
+        
+        setCounter();
+    }
     
-    render: function() {
-        var photoStyle = {
+    render() {
+        const photoStyle = {
             backgroundImage: "url('assets/img/card1.jpg')"
         };
         
+        const key = this.props.id;
+        const name = this.props.name;
+        const price = this.props.priceNew;
+
         const discount = this.props.discount,
               special = this.props.special;
-        
+
         function checkDiscount() {
             if (discount !== '') {
                 return (
-                <div className="cards__item__discount">
-                    <p>{discount}%</p>
-                </div>
-                    
+                    <div className="cards__item__discount">
+                        <p>{discount}%</p>
+                    </div>
+
                 )
             }   else {
                 return false
             }
-        } 
-        
+        }
+
         function checkSpecial() {
             if (special !== '') {
                 return (
-                <div className="cards__item__mark">
-                    <p>{special}</p>
-                </div>
-                    
+                    <div className="cards__item__mark">
+                        <p>{special}</p>
+                    </div>
+
                 )
             }   else {
                 return false
@@ -178,7 +365,7 @@ var CardItem = React.createClass({
                                 <p><strong>{this.props.priceNew}</strong> грн</p>
                             </div>
                         </div>
-                        <button className="add-to-cart" onClick={this.props.handleClick}>
+                        <button className="add-to-cart" onClick={this.addToCart.bind(this, key, name, price)}>
                             Купить
                         </button>
                     </div>
@@ -186,101 +373,20 @@ var CardItem = React.createClass({
             </div>
         )
     }
-});
+}
 
-var SeedShop = React.createClass({
-    getInitialState: function() {
-        return {
-            cardInfo: CARDS,
-            totalCounted: currentCounted
-        };
-    },
-
-    handleSearch: function(event) {
-        var searchQuery = event.target.value.toLowerCase();
-
-        var cardInfo = CARDS.filter(function(el) {
-            var searchValue = el.name.toLowerCase();
-            return searchValue.indexOf(searchQuery) !== -1;  // return element if function returns true
-        });
-
-        this.setState({
-            cardInfo: cardInfo
-        });
-    },
-
-    addToCart: function(e) {
-        var target = e.target;
-        
-        if (!target.classList.contains('disabled')) {
-            target.classList.add('disabled');
-            target.setAttribute('disabled', 'disabled');
-
-            currentCounted += 1;
-
-            this.setState({
-                totalCounted: currentCounted
-            });
-        }
-        
-    },
-    
-    render: function() {
-        var addFunc = this.addToCart;
-        
-        return (
-            <div className="shop">
-                <div className="header">
-                    <HeaderLogo/>
-                    <div className="cart">
-                        <a href="#" data-counter={this.state.totalCounted}>
-                            <img src="assets/img/cart.png" alt="Cart"/>
-                        </a>
-                    </div>
-                </div>
-                <div className="content">
-                    <SideMenu />
-                    <div className="cards">
-                        <div className="cards__controls">
-                            <SearchForm handleSearch={this.handleSearch} />
-                            <Switcher />
-                        </div>
-
-                        <div className="cards__items__list">
-                            
-                            {
-                                this.state.cardInfo.map(function(el) {
-                                    return <CardItem
-                                        key={el.id}
-                                        name={el.name}
-                                        discount={el.discount}
-                                        special={el.special}
-                                        priceOld={el.priceOld}
-                                        priceNew={el.priceNew}
-                                        handleClick={addFunc}
-                                    />;
-                                })
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
-        )  
-    } 
-});
-
-var HeaderLogo = React.createClass({
-    render: function() {
+class HeaderLogo extends React.Component {
+    render() {
         return (
             <div className="header__logo">
                 <img src="assets/img/logo.jpg" width="60" height="60" />
             </div>
         );
     }
-});
+}
 
-var SideMenu = React.createClass({
-    render: function() {
+class SideMenu extends React.Component {
+    render() {
         return (
             <nav className="menu">
                 <ul>
@@ -292,63 +398,54 @@ var SideMenu = React.createClass({
             </nav>
         )
     }
-});
+}
 
-var SideMenuItem = React.createClass({
-   render: function() {
-       return (
-           <li className="menu__item">
-               <a href="#">Menu Item</a>
-           </li>
-       )
-   } 
-});
+class SideMenuItem extends React.Component {
+    render() {
+        return (
+            <li className="menu__item">
+                <a href="#">Menu Item</a>
+            </li>
+        )
+    }
+}
 
-var Switcher = React.createClass({
-    
-    toggleList: function() {
-       var switcher = document.querySelector('.switcher'),
-           container = document.querySelector('.cards__items__list'),
-           list;
-       
-       if ((typeof switcher != 'undefined') && (typeof switcher != 'undefined')) {
-           list = document.querySelector('.switcher__list');
-           
-           container.classList.add('list');
-           container.classList.remove('grid');
-       }
-    },
-    
-    toggleGrid: function() {
-       var switcher = document.querySelector('.switcher'),
-           container = document.querySelector('.cards__items__list'),
-           grid;
-       
-       if ((typeof switcher != 'undefined') && (typeof switcher != 'undefined')) {
-           grid = document.querySelector('.switcher__grid');
-           
-           container.classList.add('grid');
-           container.classList.remove('list');
-       }
-   }, 
-    
-   render: function() {
-       return (
-           <ul className="switcher">
-               <li>
-                   <a className="switcher__list" onClick={this.toggleList}>
-                       <img src="assets/img/list.png" width="30" height="30" alt="List View" />
-                   </a>
-               </li>
-               <li>
-                   <a className="switcher__grid" onClick={this.toggleGrid}>
-                       <img src="assets/img/grid.png" width="30" height="30" alt="Grid View" />
-                   </a>
-               </li>
-           </ul>
-       )
-   } 
-});
+class Switcher extends React.Component {
+    toggleList() {
+        const switcher = document.querySelector('.switcher'),
+            container = document.querySelector('.cards__items__list');
+
+        if ((typeof switcher != 'undefined') && (typeof switcher != 'undefined')) {
+            container.classList.add('list');
+        }
+    }
+
+    toggleGrid() {
+        const switcher = document.querySelector('.switcher'),
+            container = document.querySelector('.cards__items__list');
+
+        if ((typeof switcher != 'undefined') && (typeof switcher != 'undefined')) {
+            container.classList.remove('list');
+        }
+    }
+
+    render() {
+        return (
+            <ul className="switcher">
+                <li>
+                    <a className="switcher__list" onClick={this.toggleList}>
+                        <img src="assets/img/list.png" width="30" height="30" alt="List View" />
+                    </a>
+                </li>
+                <li>
+                    <a className="switcher__grid" onClick={this.toggleGrid}>
+                        <img src="assets/img/grid.png" width="30" height="30" alt="Grid View" />
+                    </a>
+                </li>
+            </ul>
+        )
+    }
+}
 
 //render all
 

@@ -115,12 +115,51 @@ body {
     &__added {
         position: absolute;
         right: 0;
-        top: 40px;
+        top: 60px;
         z-index: 1;
+        padding: 0 5px 5px;
+        background: #fff;
+        border-radius: 2px;
+        border: 1px solid #ccc;
+        visibility: hidden;
+        opacity: 0;
+        box-shadow: 0 0 7px 0 rgba(0, 0, 0, 0.3);
+        transition: opacity .3s ease, visibility .2s ease-out, top .2s ease;
+
+        &.active {
+            visibility: visible;
+            opacity: 1;
+            top: 40px;
+        }
+
+        &__checkout {
+            display: flex;
+            justify-content: flex-end;
+            padding: 5px 0;
+        }
 
         .cards {
             &__item {
                 background: #fff;
+                min-width: 200px;
+
+                &__name {
+                    padding-top: 5px;
+                    margin-bottom: 0;
+
+                    a {
+                        &:after {
+                            display: none;
+                        }
+                    }
+                }
+
+                &__price {
+                    &--new {
+                        margin-left: 0;
+                    }
+                }
+
             }
         }
     }
@@ -394,6 +433,36 @@ body {
             cursor: default;
             background: #afc5d0;
         }
+    }
+}
+
+.remove-from-cart {
+    display: flex;
+    height: 25px;
+    background: #ef5350;
+    padding: 0 5px;
+    transition: all .2s ease;
+    font: rem(14px, 24px) $light;
+    color: #fff;
+
+    &:hover {
+        cursor: pointer;
+        background: #c62828;
+    }
+}
+
+.cart-checkout {
+    display: flex;
+    height: 25px;
+    background: #1B5E20;
+    padding: 0 5px;
+    transition: all .2s ease;
+    font: rem(14px, 24px) $light;
+    color: #fff;
+
+    &:hover {
+        cursor: pointer;
+        background: #004D40;
     }
 }
 
