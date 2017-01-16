@@ -164,11 +164,16 @@ class SeedShop extends React.Component {
         });
     }
 
-    showAdded() {
+
+    showAdded(e) {
+        let data = parseInt(e.target.parentNode.getAttribute('data-counter'));
         let cart = document.querySelector('.cart__added');
 
-        cart.classList.toggle('active');
+        if (data > 0) {
+            cart.classList.toggle('active');
+        }
     }
+
 
     render() {
         let addedItemsCounter = store.getState().count;
